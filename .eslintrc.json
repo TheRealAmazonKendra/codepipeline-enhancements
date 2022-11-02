@@ -145,7 +145,10 @@
       {
         "devDependencies": [
           "**/test/**",
-          "**/build-tools/**"
+          "**/build-tools/**",
+          "src/autorollback/autorollback.lambda.ts",
+          "src/time-windows/calendar/calendar-setup.lambda.ts",
+          "src/time-windows/change-controller/change-controller.lambda.ts"
         ],
         "optionalDependencies": false,
         "peerDependencies": true

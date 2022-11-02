@@ -18,5 +18,8 @@
 /API.md linguist-generated
 /LICENSE linguist-generated
 /package.json linguist-generated
+/src/autorollback/autorollback-function.ts linguist-generated
+/src/time-windows/calendar/calendar-setup-function.ts linguist-generated
+/src/time-windows/change-controller/change-controller-function.ts linguist-generated
 /tsconfig.dev.json linguist-generated
 /yarn.lock linguist-generated
