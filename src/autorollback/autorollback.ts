@@ -1,14 +1,15 @@
 import { randomUUID } from 'crypto';
-import { CustomResource, custom_resources, Duration, IResolvable } from 'aws-cdk-lib';
+import { CustomResource, custom_resources, Duration, IResolvable, Names } from 'aws-cdk-lib';
+import { CompositeAlarm, IAlarmRule } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { AutorollbackFunction } from './autorollback-function';
 
 export interface AutoRollbackProps {
+  readonly name?: string;
   readonly monitoringTime: IResolvable;
-  readonly searchTags: string[];
+  readonly alarmRule: IAlarmRule;
 }
 
 export class AutoRollback extends Construct {
@@ -23,10 +24,6 @@ export class AutoRollback extends Construct {
 
     const lambdaFunction = new AutorollbackFunction(this, 'Handler');
 
-    // TODO: Limit the actions granted to this role
-    pollQueue.grant(lambdaFunction.role!, '*');
-    lambdaFunction.addEventSource(new SqsEventSource(pollQueue));
-
     lambdaFunction.addToRolePolicy(
       new PolicyStatement({
         actions: ['cloudwatch:DescribeAlarms'],
@@ -34,6 +31,14 @@ export class AutoRollback extends Construct {
         effect: Effect.ALLOW,
       }),
     );
+
+    const alarmDescription = `[${props.name ?? ''}-${Names.uniqueResourceName(this, { separator: '-' })}]`;
+
+    new CompositeAlarm(this, 'composite-alarm', {
+      compositeAlarmName: props.name,
+      alarmRule: props.alarmRule,
+      alarmDescription,
+    });
 
     const provider = new custom_resources.Provider(this, 'Provider', {
       onEventHandler: lambdaFunction,
@@ -43,7 +48,8 @@ export class AutoRollback extends Construct {
     new CustomResource(this, 'Resource', {
       serviceToken: provider.serviceToken,
       properties: {
-        ...props,
+        monitoringTime: props.monitoringTime,
+        searchTerms: alarmDescription,
         queueUrl: pollQueue.queueUrl,
         nonce: randomUUID(), // this ensures that the resource is always a part of the stack update
       },

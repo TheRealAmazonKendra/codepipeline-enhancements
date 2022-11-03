@@ -36,8 +36,17 @@ export class ChangeController extends Construct {
     // Grant permission to retrieve calendars
     fn.addToRolePolicy(
       new PolicyStatement({
-        resources: ['*'],
+        resources: [props.calendar.calendarArn],
         actions: ['ssm:GetCalendarState'],
+        effect: Effect.ALLOW,
+      }),
+    );
+
+    // Grant permisssion to check alarm states
+    fn.addToRolePolicy(
+      new PolicyStatement({
+        resources: ['*'],
+        actions: ['cloudwatch:DescribeAlarms'],
         effect: Effect.ALLOW,
       }),
     );

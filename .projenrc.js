@@ -6,7 +6,13 @@ const project = new awscdk.AwsCdkConstructLibrary({
   defaultReleaseBranch: 'main',
   name: 'codepipeline-enhancements',
   repositoryUrl: 'https://github.com/53584728+TheRealAmazonKendra/codepipeline-enhancements.git',
+  publishToGo: {
 
+  },
+  publishToMaven: {},
+  publishToNuget: {},
+  publishToPypi: {},
+  publishDryRun: true,
   deps: [],
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   devDeps: [],
