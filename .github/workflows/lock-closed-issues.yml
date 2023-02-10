@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: Install gh CLI
       run: |
-        sudo apt-get install -y gh
+        npm install -g gh
     - name: Lock comments on closed issue
       run: |
         echo "Running action to lock comments on closed issues..."
