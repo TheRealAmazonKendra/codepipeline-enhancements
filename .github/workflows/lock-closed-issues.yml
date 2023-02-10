@@ -19,10 +19,36 @@ jobs:
         node-version: 14
 
     - name: Install dependencies
-      run: cd $GITHUB_WORKSPACE && npm install @octokit/rest
+      run: npm install @octokit/rest
 
     - name: Lock comments on closed issue
-      run: node_modules/.bin/rest issue#lock ${{ env.GITHUB_TOKEN }} ${{ env.GITHUB_REPOSITORY }} ${{ env.GITHUB_EVENT_NAME }}
+      run: |
+        const { Octokit } = require("@octokit/rest");
+        const octokit = new Octokit({
+          auth: process.env.GITHUB_TOKEN
+        });
+
+        async function lockIssueComments(octokit, owner, repo, issue_number) {
+          const issue = await octokit.issues.get({
+            owner,
+            repo,
+            issue_number
+          });
+
+          if (issue.data.state === "closed") {
+            await octokit.issues.update({
+              owner,
+              repo,
+              issue_number,
+              state: "closed",
+              lock_reason: "off-topic"
+            });
+          }
+        }
+
+        const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+        const issue_number = process.env.GITHUB_EVENT_NAME.split("/")[1];
+        lockIssueComments(octokit, owner, repo, issue_number);
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
