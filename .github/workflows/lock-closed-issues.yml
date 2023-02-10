@@ -1,18 +1,24 @@
 name: Lock comments on closed issues
 
 on:
-  issue_closed:
+  issues:
     types: [closed]
 
 jobs:
-  lock_comments:
+  lock-comments:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Lock comments on closed issue
-      uses: peter-evans/lock-issue-comments@v1
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        node-version: 14
+
+    - name: Lock comments on closed issue
+      run: npx @octokit/rest issue#lock ${{ env.GITHUB_TOKEN }} ${{ env.GITHUB_REPOSITORY }} ${{ env.GITHUB_EVENT_NAME }}
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
