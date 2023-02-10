@@ -3,26 +3,25 @@ name: Lock comments on closed issues
 on:
   issues:
     types: [closed]
-  workflow_dispatch:
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  lock_comments:
+  lock-comments:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Install gh CLI
-      run: |
-        npm install -g gh
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: npm install @octokit/rest
+
     - name: Lock comments on closed issue
-      run: |
-        echo "Running action to lock comments on closed issues..."
-        ISSUE_NUMBER=$(echo "$GITHUB_EVENT_NAME" | cut -d "/" -f2)
-        gh api \
-        --method PUT \
-        -H "Accept: application/vnd.github+json" \
-        /repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/lock \
-        -H "Authorization: token $GITHUB_TOKEN" \
-        -f lock_reason='resolved'
+      run: npx @octokit/rest issue#lock ${{ env.GITHUB_TOKEN }} ${{ env.GITHUB_REPOSITORY }} ${{ env.GITHUB_EVENT_NAME }}
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
