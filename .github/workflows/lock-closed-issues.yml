@@ -1,9 +1,3 @@
-name: Lock comments on closed issues
-
-on:
-  issues:
-    types: [closed]
-
 jobs:
   lock-comments:
     runs-on: ubuntu-latest
@@ -21,7 +15,13 @@ jobs:
       run: npm install @octokit/rest
 
     - name: Lock comments on closed issue
-      run: npx @octokit/rest issue#lock ${{ env.GITHUB_TOKEN }} ${{ env.GITHUB_REPOSITORY }} ${{ env.GITHUB_EVENT_NAME }}
+      run: node -e "const { Octokit } = require('@octokit/rest');
+                 const octokit = new Octokit({ auth: '${{ secrets.GITHUB_TOKEN }}' });
+                 const issueEvent = process.env.GITHUB_EVENT_NAME.split('/');
+                 const owner = issueEvent[0];
+                 const repo = issueEvent[1];
+                 const issue_number = issueEvent[3];
+                 octokit.issues.lock({ owner, repo, issue_number, lock_reason: 'off-topic' })"
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
