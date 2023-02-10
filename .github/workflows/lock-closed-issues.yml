@@ -20,7 +20,7 @@ jobs:
       run: |
         echo "Running action to lock comments on closed issues..."
         ISSUE_NUMBER=$(echo "$GITHUB_EVENT_NAME" | cut -d "/" -f2)
-        gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/lock" -X PUT \
+        echo '{"lock_reason":"resolved"}' | gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/lock" -X PUT \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github+json" \
-        -d '{"lock_reason":"resolved"}'
+        -f lock_reason='resolved'
