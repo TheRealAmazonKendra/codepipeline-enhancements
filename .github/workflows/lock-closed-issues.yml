@@ -13,12 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Install gh CLI
+      run: |
+        sudo apt-get install -y gh
     - name: Lock comments on closed issue
       run: |
         echo "Running action to lock comments on closed issues..."
         ISSUE_NUMBER=$(echo "$GITHUB_EVENT_NAME" | cut -d "/" -f2)
-        curl -X PUT \
+        echo "{\"state\":\"closed\",\"lock_reason\":\"off-topic\"}" | \
+        gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER" -X PUT \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github+json" \
-        -d "{\"state\":\"closed\",\"lock_reason\":\"off-topic\"}" \
-        https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER
+        --input-file -
