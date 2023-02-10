@@ -16,8 +16,9 @@ jobs:
     - name: Lock comments on closed issue
       run: |
         echo "Running action to lock comments on closed issues..."
+        ISSUE_NUMBER=$(echo "$GITHUB_EVENT_NAME" | cut -d "/" -f2)
         curl -X PATCH \
         -H "Authorization: token $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github+json" \
         -d "{\"state\":\"closed\",\"lock_reason\":\"off-topic\"}" \
-        https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ env.GITHUB_EVENT_NAME.split('/')[1] }}
+        https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER
